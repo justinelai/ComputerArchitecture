@@ -7,7 +7,20 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+
+
+        #8 general-purpose 8-bit numeric registers R0-R7.
+        #R5 is reserved as the interrupt mask (IM)
+        #R6 is reserved as the interrupt status (IS)
+        #R7 is reserved as the stack pointer (SP)
+        #Only hold values between 0-255. After performing math on registers in the emulator, bitwise-AND the result with 0xFF (255) to keep the register values in that range.
+        
+        self.reg = [0] * 8
+        self.ram = [0] * 2**8 #256 bytes of memory
+        self.pc = 0 # Program Counter, address of the currently executing instruction
+        self.mar = None # Memory Address Register (MAR) contains the address that is being read or written to.
+        self.mdr = None # Memory Data Register (MDR) contains the data that was read or the data to write. 
+        # You don't need to add the MAR or MDR to your CPU class, but they would make handy parameter names for ram_read() and ram_write(), if you wanted.
 
     def load(self):
         """Load a program into memory."""
@@ -30,6 +43,13 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
+    def ram_read(self, address):
+        # should accept the address to read and return the value stored there.
+        return self.ram[address]
+       
+    def ram_write(self, value, address):
+        # should accept a value to write, and the address to write it to.
+        return self.ram[address] = value
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
