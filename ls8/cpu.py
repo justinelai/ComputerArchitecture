@@ -15,12 +15,20 @@ class CPU:
         #R7 is reserved as the stack pointer (SP)
         #Only hold values between 0-255. After performing math on registers in the emulator, bitwise-AND the result with 0xFF (255) to keep the register values in that range.
         
-        self.reg = [0] * 8
-        self.ram = [0] * 2**8 #256 bytes of memory
+        self.reg = [0b0] * 8
+        self.ram = [0b0] * 2**8 #256 bytes of memory
         self.pc = 0 # Program Counter, address of the currently executing instruction
         self.mar = None # Memory Address Register (MAR) contains the address that is being read or written to.
         self.mdr = None # Memory Data Register (MDR) contains the data that was read or the data to write. 
         # You don't need to add the MAR or MDR to your CPU class, but they would make handy parameter names for ram_read() and ram_write(), if you wanted.
+        self.ir = None # Instruction register contains a copy of the currently executing instruction
+
+        self.opcodes = {
+            0b10000010: "LDI",
+            0b01000111: "PRN",
+            0b00000001: "HLT"
+        }
+
 
     def load(self):
         """Load a program into memory."""
@@ -82,4 +90,17 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        """
+        It needs to read the memory address that's stored in register PC, and store that result in IR, the Instruction Register. This can just be a local variable in run(). 
+        """
+        running = True
+        print("Running CPU...")
+        while True:
+            self.ir = self.ram_read(self.pc)
+            opcode = self.opcodes[self.ir]
+            if opcode has two args
+                operand_a = self. [self.pc + 1]
+                operand_b = 
+            elif opcode has one arg
+                operand_a = 
+            else:
