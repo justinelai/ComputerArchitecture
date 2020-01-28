@@ -46,7 +46,8 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -87,7 +88,7 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
             self.branchtable[ir](operand_a, operand_b)
-
+    
     def handle_hlt(self, operand_a, operand_b):
         print("Halted!")
         self.running = False
@@ -102,5 +103,5 @@ class CPU:
         print(self.reg[operand_a])
         self.pc += 2
     def handle_mul(self, operand_a, operand_b):
-        self.reg[operand_a] *= self.reg[operand_b]
+        self.alu("MUL", operand_a, operand_b)
         self.pc += 3
