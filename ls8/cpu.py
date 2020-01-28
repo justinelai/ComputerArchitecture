@@ -74,6 +74,7 @@ class CPU:
         HLT = 0b00000001
         LDI = 0b10000010
         PRN = 0b01000111
+        MUL = 0b10100010
         print("Running CPU...")
         print(self.ram)
         running = True
@@ -92,8 +93,10 @@ class CPU:
             elif ir == PRN:
                 # PRN register pseudo-instruction - Print numeric value stored in the given register.
                 # Print to the console the decimal integer value that is stored in the given register.
-                print(int(self.reg[operand_a]))
+                print(self.reg[operand_a])
                 self.pc += 2
+            elif ir == MUL:
+                self.reg[operand_a] *= self.reg[operand_b]
+                self.pc += 3
             else:
-                pass
-                #self.pc += 1
+                self.pc += 1
