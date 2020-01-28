@@ -13,27 +13,25 @@ class CPU:
         self.pc = 0 # Program Counter, address of the currently executing instruction
 
     def load(self):
-        """Load a program into memory."""
-
-        address = 0
-
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
-
-
+        if len(sys.argv) != 2:
+            print("Usage: file.py filename", file=sys.stderr)
+            sys.exit(1)
+        try:
+            address = 0
+            with open(sys.argv[1]) as f:
+                for line in f:
+                    # Ignore comments
+                    comment_split = line.split("#")
+                    num = comment_split[0].strip()
+                    if num == "":
+                        continue  # Ignore blank lines
+                    value = int(num, 2)   # Base 10, but ls-8 is base 2
+                    self.ram[address] = value
+                    address += 1
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)
+        
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
@@ -63,21 +61,21 @@ class CPU:
 
         print()
 
-    def ram_read(self, addr):
+    def ram_read(self, address):
         # should accept the address to read and return the value stored there.
-        return self.ram[addr]
+        return self.ram[address]
        
-    def ram_write(self, addr, value):
+    def ram_write(self, address, value):
         # should accept a value to write, and the address to write it to.
-        self.ram[addr] = value
+        self.ram[address] = value
 
     def run(self):
         """Run the CPU."""
         HLT = 0b00000001
         LDI = 0b10000010
         PRN = 0b01000111
-
         print("Running CPU...")
+        print(self.ram)
         running = True
         while running:
             ir = self.ram_read(self.pc)
@@ -85,6 +83,7 @@ class CPU:
             operand_b = self.ram_read(self.pc + 2)
 
             if ir == HLT:
+                self.running = False
                 sys.exit(1) # Error exit status
             elif ir == LDI:
                 # LDI register immediate - Set the value of a register to an integer.
@@ -96,4 +95,5 @@ class CPU:
                 print(int(self.reg[operand_a]))
                 self.pc += 2
             else:
-                self.pc += 1
+                pass
+                #self.pc += 1
