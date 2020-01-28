@@ -2,6 +2,11 @@
 
 import sys
 
+HLT = 0b00000001
+LDI = 0b10000010
+PRN = 0b01000111
+MUL = 0b10100010
+
 class CPU:
     """Main CPU class."""
 
@@ -9,8 +14,12 @@ class CPU:
         """Construct a new CPU."""
         self.reg = [0] * 8
         self.ram = [0] * 256 #256 bytes of memory
-
         self.pc = 0 # Program Counter, address of the currently executing instruction
+        self.branchtable = {}
+        self.branchtable[HLT] = self.handle_hlt
+        self.branchtable[LDI] = self.handle_ldi
+        self.branchtable[PRN] = self.handle_prn
+        self.branchtable[MUL] = self.handle_mul
 
     def load(self):
         if len(sys.argv) != 2:
@@ -71,32 +80,27 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        HLT = 0b00000001
-        LDI = 0b10000010
-        PRN = 0b01000111
-        MUL = 0b10100010
         print("Running CPU...")
-        print(self.ram)
         running = True
         while running:
             ir = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
+            self.branchtable[ir](operand_a, operand_b)
 
-            if ir == HLT:
-                self.running = False
-                sys.exit(1) # Error exit status
-            elif ir == LDI:
-                # LDI register immediate - Set the value of a register to an integer.
-                self.reg[operand_a] = operand_b
-                self.pc += 3
-            elif ir == PRN:
-                # PRN register pseudo-instruction - Print numeric value stored in the given register.
-                # Print to the console the decimal integer value that is stored in the given register.
-                print(self.reg[operand_a])
-                self.pc += 2
-            elif ir == MUL:
-                self.reg[operand_a] *= self.reg[operand_b]
-                self.pc += 3
-            else:
-                self.pc += 1
+    def handle_hlt(self, operand_a, operand_b):
+        print("Halted!")
+        self.running = False
+        sys.exit(1) # Error exit status
+    def handle_ldi(self, operand_a, operand_b):
+        # LDI register immediate - Set the value of a register to an integer.
+        self.reg[operand_a] = operand_b
+        self.pc += 3
+    def handle_prn(self, operand_a, operand_b):
+        # PRN register pseudo-instruction - Print numeric value stored in the given register.
+        # Print to the console the decimal integer value that is stored in the given register.
+        print(self.reg[operand_a])
+        self.pc += 2
+    def handle_mul(self, operand_a, operand_b):
+        self.reg[operand_a] *= self.reg[operand_b]
+        self.pc += 3
