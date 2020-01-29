@@ -6,6 +6,8 @@ HLT = 0b00000001
 LDI = 0b10000010
 PRN = 0b01000111
 MUL = 0b10100010
+POP = 0b01000110
+PUSH = 0b01000101
 
 class CPU:
     """Main CPU class."""
@@ -20,6 +22,24 @@ class CPU:
         self.branchtable[LDI] = self.handle_ldi
         self.branchtable[PRN] = self.handle_prn
         self.branchtable[MUL] = self.handle_mul
+        self.branchtable[PUSH] = self.push
+        self.branchtable[POP] = self.pop
+        self.sp = 7
+        self.reg[self.sp] = 0xf4 # initialize stack pointer to empty stack
+
+    def push(self, *operands):
+        self.reg[self.sp] -= 1 #decrement sp
+        reg_num = self.ram[self.pc + 1]
+        reg_value = self.reg[reg_num]
+        self.ram[self.reg[self.sp]] = reg_value # copy register value into memory at address SP
+        self.pc += 2
+    
+    def pop(self, *operands):
+        val = self.ram[self.reg[self.sp]]
+        reg_num = self.ram[self.pc + 1]
+        self.reg[reg_num] = val # copy val FROM memory at SP into register
+        self.reg[self.sp] += 1
+        self.pc += 2
 
     def load(self):
         if len(sys.argv) != 2:
@@ -84,6 +104,7 @@ class CPU:
         print("Running CPU...")
         running = True
         while running:
+            self.trace()
             ir = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
